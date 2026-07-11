@@ -1,0 +1,25 @@
+[Unit]
+Description=QilingOS SafeOps Agent
+After=network.target
+
+[Service]
+Type=simple
+User=safeops
+Group=safeops
+WorkingDirectory=/opt/qilingos-safeops-agent
+Environment=SPRING_PROFILES_ACTIVE=linux
+Environment=SAFEOPS_SERVER_PORT=8088
+Environment=JAVA_OPTS=-Xms256m -Xmx512m
+ExecStart=/usr/bin/java $JAVA_OPTS -jar /opt/qilingos-safeops-agent/qilingos-safeops-agent.jar
+Restart=on-failure
+RestartSec=5
+SuccessExitStatus=143
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/qilingos-safeops-agent/data
+
+[Install]
+WantedBy=multi-user.target

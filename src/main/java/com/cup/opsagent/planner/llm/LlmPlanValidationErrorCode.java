@@ -1,0 +1,14 @@
+package com.cup.opsagent.planner.llm;
+
+public enum LlmPlanValidationErrorCode {
+    NULL_RESPONSE,
+    REQUIRED_FIELD_MISSING,
+    TOO_MANY_STEPS,
+    NULL_STEP,
+    UNKNOWN_TOOL,
+    UNSUPPORTED_ARGUMENT,
+    REQUIRED_ARGUMENT_MISSING,
+    RESPONSE_TOO_LARGE,
+    FIELD_TOO_LONG,
+    ARGUMENT_VALUE_TOO_LONG
+}

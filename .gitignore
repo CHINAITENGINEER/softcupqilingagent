@@ -1,0 +1,13 @@
+# Local environment and secrets
+.env
+.env.local
+.env.*.local
+
+# Maven and release build output
+target/
+release-staging/
+*.tar.gz
+
+# IDE files
+.idea/
+*.iml
