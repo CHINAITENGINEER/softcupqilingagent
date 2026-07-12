@@ -74,10 +74,14 @@ class RagMilvusKnowledgeIntegrationTest {
                 .uri(envOrDefault("SAFEOPS_RAG_MILVUS_URI", DEFAULT_MILVUS_URI))
                 .token(envOrDefault("SAFEOPS_RAG_MILVUS_TOKEN", ""))
                 .build());
-        if (client.hasCollection(HasCollectionReq.builder().collectionName(collection).build())) {
-            client.dropCollection(DropCollectionReq.builder()
-                    .collectionName(collection)
-                    .build());
+        try {
+            if (client.hasCollection(HasCollectionReq.builder().collectionName(collection).build())) {
+                client.dropCollection(DropCollectionReq.builder()
+                        .collectionName(collection)
+                        .build());
+            }
+        } finally {
+            client.close();
         }
     }
 
@@ -115,18 +119,22 @@ class RagMilvusKnowledgeIntegrationTest {
                 .uri(envOrDefault("SAFEOPS_RAG_MILVUS_URI", DEFAULT_MILVUS_URI))
                 .token(envOrDefault("SAFEOPS_RAG_MILVUS_TOKEN", ""))
                 .build());
-        DescribeIndexResp response = client.describeIndex(DescribeIndexReq.builder()
-                .collectionName(envOrDefault("SAFEOPS_RAG_MILVUS_COLLECTION", DEFAULT_COLLECTION))
-                .fieldName("embedding")
-                .build());
-        DescribeIndexResp.IndexDesc indexDesc = response.getIndexDescByFieldName("embedding");
+        try {
+            DescribeIndexResp response = client.describeIndex(DescribeIndexReq.builder()
+                    .collectionName(envOrDefault("SAFEOPS_RAG_MILVUS_COLLECTION", DEFAULT_COLLECTION))
+                    .fieldName("embedding")
+                    .build());
+            DescribeIndexResp.IndexDesc indexDesc = response.getIndexDescByFieldName("embedding");
 
-        assertThat(indexDesc).isNotNull();
-        assertThat(indexDesc.getIndexType()).isEqualTo(IndexParam.IndexType.HNSW);
-        assertThat(indexDesc.getMetricType()).isEqualTo(IndexParam.MetricType.COSINE);
-        assertThat(indexDesc.getExtraParams()).containsKeys("M", "efConstruction");
-        assertThat(String.valueOf(indexDesc.getExtraParams().get("M"))).isEqualTo("16");
-        assertThat(String.valueOf(indexDesc.getExtraParams().get("efConstruction"))).isEqualTo("200");
+            assertThat(indexDesc).isNotNull();
+            assertThat(indexDesc.getIndexType()).isEqualTo(IndexParam.IndexType.HNSW);
+            assertThat(indexDesc.getMetricType()).isEqualTo(IndexParam.MetricType.COSINE);
+            assertThat(indexDesc.getExtraParams()).containsKeys("M", "efConstruction");
+            assertThat(String.valueOf(indexDesc.getExtraParams().get("M"))).isEqualTo("16");
+            assertThat(String.valueOf(indexDesc.getExtraParams().get("efConstruction"))).isEqualTo("200");
+        } finally {
+            client.close();
+        }
     }
 
     private static boolean shouldKeepCollection(String collection, String temporaryPrefix) {
