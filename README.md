@@ -5,6 +5,20 @@
 
 QilingOS SafeOps Agent is a Spring Boot based intelligent operations agent for safe, auditable, and approval-aware system operations. It includes rule-based planning, OpenAI-compatible LLM planning, policy checks, approval workflow, audit trace, verification, and RAG knowledge retrieval with Milvus vector store support.
 
+## SafeOps Console
+
+The repository includes a modern React + TypeScript security-operations command center in [`web/`](web/). It provides an Agent Chat experience, approval center, audit hash-chain viewer, RAG/Milvus knowledge console, and system connection settings. The console automatically switches to clearly marked Demo Mode when the backend is unavailable.
+
+```powershell
+cd web
+npm install
+npm run dev
+```
+
+See [`web/README.md`](web/README.md) for integration, demo mode, build, and preview instructions.
+
+<!-- SafeOps Console screenshot placeholder: add `docs/images/safeops-console-overview.png` after UI capture. -->
+
 ## Features
 
 - Safe agent orchestration for read-only and risky operations.
@@ -95,9 +109,14 @@ ops-agent.rag.enabled=false
 
 ## Start local Milvus
 
-A simple local Milvus Standalone setup can be created outside this repository, for example in `D:\milvus-standalone`, using etcd, MinIO, and Milvus containers.
+Start the same standalone Milvus stack used by the integration workflow:
 
-Minimal service versions used by CI:
+```powershell
+docker compose -f docker-compose.milvus.yml up -d
+docker compose -f docker-compose.milvus.yml ps
+```
+
+The compose stack includes:
 
 ```text
 quay.io/coreos/etcd:v3.5.5
@@ -116,6 +135,18 @@ Expected TCP result:
 
 ```text
 TcpTestSucceeded : True
+```
+
+Stop the stack:
+
+```powershell
+docker compose -f docker-compose.milvus.yml down
+```
+
+Remove local Milvus data volumes when you need a clean demo environment:
+
+```powershell
+docker compose -f docker-compose.milvus.yml down -v
 ```
 
 ## RAG + Milvus configuration
@@ -202,6 +233,26 @@ By default, integration tests use temporary collections and clean them up. To ke
 $env:SAFEOPS_RAG_MILVUS_KEEP_COLLECTION="true"
 ```
 
+## Demo assets
+
+Demo knowledge documents are provided under:
+
+```text
+demo/knowledge/
+```
+
+They cover:
+
+- QilingOS Nginx operations.
+- System load inspection.
+- Milvus RAG troubleshooting.
+
+A Chinese presentation and recording script is available at:
+
+```text
+docs/demo-script-zh.md
+```
+
 ## CI workflows
 
 ### Java CI
@@ -275,6 +326,16 @@ AuditTrace
 Milvus SDK usage is guarded by an architecture test so business packages do not directly depend on `io.milvus`.
 
 ## Documentation
+
+Project-level documentation:
+
+```text
+docs/api.md
+docs/architecture.md
+docs/security-model.md
+docs/roadmap.md
+docs/demo-script-zh.md
+```
 
 Main RAG implementation and operations notes:
 
