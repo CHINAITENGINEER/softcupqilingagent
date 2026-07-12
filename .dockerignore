@@ -1,0 +1,9 @@
+.git
+.idea
+target
+web/node_modules
+web/dist
+.demo-runtime
+.env
+.env.*
+*.tar.gz

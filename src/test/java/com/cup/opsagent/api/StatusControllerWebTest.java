@@ -50,6 +50,31 @@ class StatusControllerWebTest {
     }
 
     @Test
+    void shouldExposeSystemMetricsForConsole() throws Exception {
+        approvalService.requestApproval(
+                "trace-system-metrics",
+                "step-1",
+                "operator-1",
+                "restart_service",
+                Map.of("serviceName", "nginx"),
+                RiskLevel.CRITICAL,
+                "metrics fixture"
+        );
+
+        mockMvc.perform(get("/api/system/metrics"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.windowHours").value(24))
+                .andExpect(jsonPath("$.operationTrend.length()").value(24))
+                .andExpect(jsonPath("$.riskDistribution.LOW").isNumber())
+                .andExpect(jsonPath("$.riskDistribution.CRITICAL").isNumber())
+                .andExpect(jsonPath("$.approvalStatusDistribution.PENDING").isNumber())
+                .andExpect(jsonPath("$.verification.total").isNumber())
+                .andExpect(jsonPath("$.verification.successRate").isNumber())
+                .andExpect(jsonPath("$.auditTraceCount").isNumber())
+                .andExpect(jsonPath("$.ragRetrievalCount").isNumber());
+    }
+
+    @Test
     void shouldExposeRagStatusAndStatsForConsole() throws Exception {
         mockMvc.perform(get("/api/rag/status"))
                 .andExpect(status().isOk())

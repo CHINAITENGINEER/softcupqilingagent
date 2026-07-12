@@ -13,3 +13,4 @@ export type ToolDefinition = { name: string; description?: string; riskLevel?: R
 export type KnowledgeInput = { title: string; source: string; content: string; tags: string }
 export type ApprovalDecision = { approvalId: string; status: string; leaseId: string; actionHash: string; leaseExpiresAt: string }
 export type ApprovalExecution = { leaseId: string; executionSuccess: boolean; verified: boolean; failureCode: string; verificationReason: string }
+export type SystemMetrics = { generatedAt: string; windowHours: number; operationTrend: { hour: string; count: number }[]; riskDistribution: Record<RiskLevel, number>; approvalStatusDistribution: Record<string, number>; verification: { total: number; successful: number; failed: number; successRate: number }; auditTraceCount: number; ragRetrievalCount: number }

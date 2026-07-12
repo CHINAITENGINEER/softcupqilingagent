@@ -11,3 +11,8 @@ release-staging/
 # IDE files
 .idea/
 *.iml
+
+# Local demo runtime
+.demo-runtime/
+web/node_modules/
+web/dist/

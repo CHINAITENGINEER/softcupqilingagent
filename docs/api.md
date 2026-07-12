@@ -55,6 +55,25 @@ Response highlights:
 }
 ```
 
+### GET `/api/system/metrics`
+
+Returns payload-free dashboard aggregates for the latest 24-hour UTC window:
+
+```json
+{
+  "generatedAt": "2026-07-12T10:00:00Z",
+  "windowHours": 24,
+  "operationTrend": [{ "hour": "10", "count": 2 }],
+  "riskDistribution": { "LOW": 0, "MEDIUM": 1, "HIGH": 1, "CRITICAL": 0 },
+  "approvalStatusDistribution": { "PENDING": 1, "APPROVED": 0, "REJECTED": 0, "CONSUMED": 1, "EXPIRED": 0 },
+  "verification": { "total": 1, "successful": 1, "failed": 0, "successRate": 1.0 },
+  "auditTraceCount": 2,
+  "ragRetrievalCount": 1
+}
+```
+
+Counts are derived from the current approval and audit repositories. The endpoint does not expose audit payloads, canonical arguments, API keys, or provider tokens.
+
 ## Agent
 
 ### POST `/api/agent/chat`

@@ -60,6 +60,12 @@ The System Settings screen can also override this value locally. The console use
 
 Approval Center, Dashboard, RAG Knowledge, and Settings are wired to live APIs first, then fall back to demo resources if the backend is unavailable.
 
+## Approval execution and API errors
+
+In Live Mode, Approval Center loads the canonical approval detail before making a decision. Approval creates a short-lived lease bound to `toolName`, canonical arguments, risk level, and `actionHash`; execution displays both tool and verification results. HTTP validation, authorization, not-found, conflict, timeout, and network failures are shown without updating the operation to a false success state.
+
+The default backend uses rule planning, deterministic embeddings, and in-memory storage, so no API key is required. Real LLM or embedding keys belong only in backend environment variables and must never use a `VITE_*` prefix.
+
 ## Demo mode
 
 If the backend is unavailable, each page gracefully renders representative SafeOps data and marks the state as **Demo Mode**. No mock action is sent to an external system.

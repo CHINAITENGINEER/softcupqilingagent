@@ -328,6 +328,30 @@ AuditTrace
 
 Milvus SDK usage is guarded by an architecture test so business packages do not directly depend on `io.milvus`.
 
+## Demo deployment
+
+The default configuration is a zero-secret local demo: rule planner, deterministic embeddings, in-memory vector store, and H2. No API key is required for tests or this mode.
+
+Start directly on Windows:
+
+```powershell
+.\scripts\start-demo.ps1 -SkipMilvus
+```
+
+Stop processes started by the script:
+
+```powershell
+.\scripts\stop-demo.ps1
+```
+
+Build and run the containerized demo from a clean checkout:
+
+```powershell
+docker compose -f docker-compose.demo.yml up --build
+```
+
+Open `http://localhost:8080`. The backend is exposed on `http://localhost:8088`. Real LLM and embedding credentials must be injected only through backend environment variables such as `SAFEOPS_LLM_API_KEY` and `SAFEOPS_RAG_EMBEDDING_API_KEY`; never expose them through `VITE_*` variables or commit them to the repository. Milvus remains optional and is configured through the existing `rag-milvus` profile and `SAFEOPS_RAG_*` environment variables.
+
 ## Documentation
 
 Project-level documentation:

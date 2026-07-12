@@ -77,6 +77,28 @@ class ApprovalControllerWebTest {
     }
 
     @Test
+    void shouldReturnConflictWhenApprovalStateNoLongerAllowsApprove() throws Exception {
+        ApprovalRecord approval = requestApproval("requester-conflict");
+        String request = json(Map.of("approvalId", approval.approvalId()));
+
+        mockMvc.perform(post("/api/approvals/approve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(ActorResolver.ACTOR_ID_HEADER, "approver-conflict")
+                        .header(ActorResolver.ACTOR_ROLES_HEADER, "APPROVER")
+                        .content(request))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/approvals/approve")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(ActorResolver.ACTOR_ID_HEADER, "approver-conflict")
+                        .header(ActorResolver.ACTOR_ROLES_HEADER, "APPROVER")
+                        .content(request))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STATE_CONFLICT"))
+                .andExpect(jsonPath("$.path").value("/api/approvals/approve"));
+    }
+
+    @Test
     void shouldListAndGetApprovalDetails() throws Exception {
         ApprovalRecord approval = requestApproval("requester-list");
 

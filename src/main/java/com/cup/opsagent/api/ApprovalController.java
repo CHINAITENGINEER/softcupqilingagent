@@ -56,11 +56,10 @@ public class ApprovalController {
     }
 
     @GetMapping("/{approvalId}")
-    public ResponseEntity<ApprovalDetailResponse> getApproval(@PathVariable String approvalId) {
+    public ApprovalDetailResponse getApproval(@PathVariable String approvalId) {
         return approvalService.findApproval(approvalId)
                 .map(ApprovalDetailResponse::from)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .orElseThrow(() -> new java.util.NoSuchElementException("approval not found: " + approvalId));
     }
 
     @PostMapping("/approve")

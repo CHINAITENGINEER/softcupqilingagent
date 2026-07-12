@@ -146,7 +146,7 @@ public class ApprovalService {
             throw new IllegalArgumentException("approvalId must not be blank");
         }
         return approvalRepository.findApproval(approvalId)
-                .orElseThrow(() -> new IllegalArgumentException("approval not found: " + approvalId));
+                .orElseThrow(() -> new java.util.NoSuchElementException("approval not found: " + approvalId));
     }
 
     private ExecutionLease currentLease(String leaseId) {
@@ -154,6 +154,6 @@ public class ApprovalService {
             throw new IllegalArgumentException("leaseId must not be blank");
         }
         return approvalRepository.findLease(leaseId)
-                .orElseThrow(() -> new IllegalArgumentException("execution lease not found: " + leaseId));
+                .orElseThrow(() -> new java.util.NoSuchElementException("execution lease not found: " + leaseId));
     }
 }
