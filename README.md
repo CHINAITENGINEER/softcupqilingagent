@@ -10,6 +10,8 @@ QilingOS SafeOps Agent is a Spring Boot based intelligent operations agent for s
 
 The repository includes a modern React + TypeScript security-operations command center in [`web/`](web/). It provides an Agent Chat experience, approval center, audit hash-chain viewer, RAG/Milvus knowledge console, and system connection settings. The console automatically switches to clearly marked Demo Mode when the backend is unavailable.
 
+The Console is engineered as a portfolio-grade frontend: route-level code splitting, typed API adapters, reusable safety-domain components, responsive command-center UI, and independent Web Console CI-ready build/lint/typecheck commands.
+
 ```powershell
 cd web
 npm install

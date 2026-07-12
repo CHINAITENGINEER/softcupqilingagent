@@ -1,0 +1,11 @@
+import { useCallback, useState } from 'react'
+import { Shield } from 'lucide-react'
+import { api } from '../../api/client'
+import type { Approval } from '../../api/types'
+import { approvals as demoApprovals } from '../../data/demo'
+import { now } from '../../lib/format'
+import { useDemoResource } from '../../hooks/useDemoResource'
+import { ApprovalCard } from '../../components/safety/ApprovalCard'
+import { Badge } from '../../components/ui/Badge'
+import { Card } from '../../components/ui/Card'
+export default function ApprovalCenterPage() { const request = useCallback(() => api.approvals(), []); const { data, demo, setData } = useDemoResource(request, demoApprovals); const [manual, setManual] = useState(''); const pending = data.filter(item => item.status === 'PENDING'); const critical = pending.filter(item => item.riskLevel === 'CRITICAL' || item.riskLevel === 'HIGH'); const decide = async (approval: Approval, decision: 'approve' | 'reject') => { try { await api.decide(approval.approvalId, decision) } catch { /* Demo state retains the expected decision interaction. */ } setData(data.map(item => item.approvalId === approval.approvalId ? { ...item, status: decision === 'approve' ? 'APPROVED' : 'REJECTED' } : item)) }; return <div className="page"><div className="pagehead"><div><p>HUMAN-IN-THE-LOOP CONTROL</p><h1>Approval center</h1></div><Badge tone="demo">{demo ? 'DEMO QUEUE' : 'LIVE QUEUE'}</Badge></div><div className="approval-banner"><Shield/><div><b>{pending.length} operations await trusted authorization</b><span>所有操作已通过策略预检；批准将创建带时效的执行租约。</span></div><Badge tone="danger">{critical.length} HIGH+</Badge></div><Card><div className="table-head"><div><p>APPROVAL QUEUE</p><h3>Risk-aware operations</h3></div><label className="manual"><input value={manual} onChange={event => setManual(event.target.value)} placeholder="输入 approvalId"/><button className="ghost" onClick={() => manual && void decide({ approvalId: manual, toolName: 'manual_action', requester: 'operator', riskLevel: 'HIGH', reason: 'Manual request', createdAt: now(), status: 'PENDING' }, 'approve')}>Approve ID</button></label></div><div className="approval-list">{data.map(item => <ApprovalCard approval={item} onDecide={decide} key={item.approvalId}/>)}</div></Card></div> }

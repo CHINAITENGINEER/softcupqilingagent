@@ -1,0 +1,2 @@
+import { Check } from 'lucide-react'
+export function SafetyPipeline({ active = 6 }: { active?: number }) { const steps = ['Planner', 'Policy', 'Approval', 'Execute', 'Verify', 'Audit']; return <div className="pipeline">{steps.map((step, index) => <div className={index < active ? 'active' : index === active ? 'current' : ''} key={step}><span>{index < active ? <Check size={13}/> : index + 1}</span><label>{step}</label>{index < 5 && <b/>}</div>)}</div> }

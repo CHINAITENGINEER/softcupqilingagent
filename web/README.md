@@ -8,6 +8,22 @@ SafeOps Console is the React + TypeScript command center for QilingOS SafeOps Ag
 - React Router, Recharts, Lucide icons
 - Central typed API adapter with automatic demo fallback
 
+## Architecture
+
+```text
+src/
+  app/            application composition, shell layout, lazy router
+  pages/          route-level feature pages
+  components/ui/  shared visual primitives
+  components/safety/  domain-specific safety and audit views
+  api/            typed client and backend contracts
+  hooks/          demo-resource, local-storage, API-status hooks
+  lib/            storage and formatting helpers
+  styles/         global console styling entrypoint
+```
+
+Each route is loaded with `React.lazy` and `Suspense`. Recharts is isolated into a dedicated build chunk, keeping the command-center shell and initial page lightweight.
+
 ## Start
 
 ```powershell
@@ -26,16 +42,23 @@ Create `web/.env.local`:
 VITE_SAFEOPS_API_BASE_URL=http://localhost:8088
 ```
 
-The System Settings screen can also override this value locally. The console uses:
+The System Settings screen can also override this value locally. The console uses these live backend endpoints:
 
-- `POST /api/agent/chat`
+- `GET /api/system/status`
+- `GET /api/approvals`
+- `GET /api/approvals/{approvalId}`
 - `POST /api/approvals/approve` and `/reject`
+- `POST /api/approvals/execute`
+- `GET /api/tools`
+- `GET /api/rag/status`
+- `GET /api/rag/stats`
+- `POST /api/agent/chat`
 - `GET /api/audit/traces`
 - `GET /api/rag/knowledge/search`
 - `POST /api/rag/knowledge/ingest`
 - `GET /actuator/health`
 
-The current backend exposes no approval-list endpoint, so that screen intentionally displays a polished demo queue plus manual approval-ID action entry.
+Approval Center, Dashboard, RAG Knowledge, and Settings are wired to live APIs first, then fall back to demo resources if the backend is unavailable.
 
 ## Demo mode
 
@@ -49,3 +72,7 @@ npm run lint
 npm run build
 npm run preview
 ```
+
+## Screenshots
+
+Screenshot placeholders and capture guidance live in [`../docs/images/README.md`](../docs/images/README.md). Add only redacted, non-sensitive showcase images under the documented filenames.

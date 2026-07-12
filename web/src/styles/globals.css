@@ -1,0 +1,2 @@
+@import '../styles.css';
+.route-loading{min-height:calc(100vh - 67px);display:grid;place-items:center}

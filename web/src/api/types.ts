@@ -1,0 +1,15 @@
+export type AgentStep = { name?: string; toolName?: string; status?: string; decision?: string; executed?: boolean; executionResult?: unknown; verificationResult?: unknown }
+export type AgentResponse = { traceId: string; status: string; answer: string; steps?: AgentStep[]; startedAt?: string; endedAt?: string; approvalId?: string }
+export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+export type Approval = { approvalId: string; toolName: string; serviceName?: string; requester: string; riskLevel: RiskLevel; reason: string; createdAt: string; status: string; traceId?: string; arguments?: Record<string, unknown>; actionHash?: string; expiresAt?: string; decidedAt?: string; decidedBy?: string }
+export type AuditEvent = { eventType?: string; actor?: string; toolName?: string; createdAt?: string; hash?: string; previousHash?: string; status?: string }
+export type AuditTrace = { traceId: string; status?: string; summary?: string; startedAt?: string; endedAt?: string; events?: AuditEvent[] }
+export type Knowledge = { knowledgeId: string; sourceType: string; title: string; snippet: string; score: number; lastUpdatedAt?: string; metadata?: Record<string, string> }
+export type HealthResponse = { status: string; components?: Record<string, unknown> }
+export type SystemStatus = { status: string; serviceName: string; version: string; activeProfiles: string[]; serverTime: string; agent: { status: string; registeredToolCount: number }; approvals: { total: number; pending: number; highRiskPending: number }; audit: { traceCount: number; integrityMode: string }; rag: { enabled: boolean; retrieverMode: string; vectorStoreProvider: string }; runtime: Record<string, unknown> }
+export type RagStatus = { enabled: boolean; retrieverMode: string; embeddingProvider: string; embeddingModel: string; vectorStoreProvider: string; milvusUri: string; milvusCollection: string; milvusDimension: number; milvusMetricType: string; milvusIndexType: string; milvusAutoCreateCollection: boolean; milvusAutoLoadCollection: boolean; milvusValidateIndex: boolean; maxResults: number; contextMaxLength: number; snippetMaxLength: number }
+export type RagStats = { vectorStoreProvider: string; collection: string; vectorRecordCount: number; vectorRecordCountStatus: string; indexParameters: Record<string, number> }
+export type ToolDefinition = { name: string; description?: string; riskLevel?: RiskLevel }
+export type KnowledgeInput = { title: string; source: string; content: string; tags: string }
+export type ApprovalDecision = { approvalId: string; status: string; leaseId: string; actionHash: string; leaseExpiresAt: string }
+export type ApprovalExecution = { leaseId: string; executionSuccess: boolean; verified: boolean; failureCode: string; verificationReason: string }
