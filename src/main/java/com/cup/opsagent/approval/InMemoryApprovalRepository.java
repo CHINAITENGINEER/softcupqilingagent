@@ -3,6 +3,8 @@ package com.cup.opsagent.approval;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +24,14 @@ public class InMemoryApprovalRepository implements ApprovalRepository {
     @Override
     public Optional<ApprovalRecord> findApproval(String approvalId) {
         return Optional.ofNullable(approvals.get(approvalId));
+    }
+
+    @Override
+    public List<ApprovalRecord> listApprovals() {
+        return approvals.values().stream()
+                .sorted(Comparator.comparing(ApprovalRecord::createdAt).reversed()
+                        .thenComparing(ApprovalRecord::approvalId))
+                .toList();
     }
 
     @Override

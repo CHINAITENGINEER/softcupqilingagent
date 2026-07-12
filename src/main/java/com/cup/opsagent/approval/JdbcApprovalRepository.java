@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -88,6 +89,18 @@ public class JdbcApprovalRepository implements ApprovalRepository {
                 approvalRowMapper(),
                 approvalId
         ).stream().findFirst();
+    }
+
+    @Override
+    public List<ApprovalRecord> listApprovals() {
+        return jdbcTemplate.query("""
+                        select approval_id, trace_id, step_id, requester_id, tool_name, canonical_arguments, risk_level, action_hash,
+                               status, reason, created_at, expires_at, decided_at, decided_by
+                        from approval_records
+                        order by created_at desc, approval_id asc
+                        """,
+                approvalRowMapper()
+        );
     }
 
     @Override

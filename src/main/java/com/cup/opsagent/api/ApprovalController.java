@@ -14,12 +14,17 @@ import com.cup.opsagent.auth.CurrentActor;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -41,6 +46,21 @@ public class ApprovalController {
         this.approvedActionExecutor = approvedActionExecutor;
         this.auditLogService = auditLogService;
         this.approverPolicy = approverPolicy;
+    }
+
+    @GetMapping
+    public List<ApprovalSummaryResponse> listApprovals() {
+        return approvalService.listApprovals().stream()
+                .map(ApprovalSummaryResponse::from)
+                .toList();
+    }
+
+    @GetMapping("/{approvalId}")
+    public ResponseEntity<ApprovalDetailResponse> getApproval(@PathVariable String approvalId) {
+        return approvalService.findApproval(approvalId)
+                .map(ApprovalDetailResponse::from)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/approve")
@@ -105,6 +125,85 @@ public class ApprovalController {
             }
         }
         return Map.copyOf(result);
+    }
+
+    public record ApprovalSummaryResponse(
+            String approvalId,
+            String traceId,
+            String stepId,
+            String requesterId,
+            String toolName,
+            String serviceName,
+            String riskLevel,
+            String status,
+            String reason,
+            String actionHash,
+            Instant createdAt,
+            Instant expiresAt,
+            Instant decidedAt,
+            String decidedBy
+    ) {
+        static ApprovalSummaryResponse from(ApprovalRecord approval) {
+            return new ApprovalSummaryResponse(
+                    approval.approvalId(),
+                    approval.traceId(),
+                    approval.stepId(),
+                    approval.requesterId(),
+                    approval.toolName(),
+                    extractServiceName(approval),
+                    approval.riskLevel().name(),
+                    approval.status().name(),
+                    approval.reason(),
+                    approval.actionHash(),
+                    approval.createdAt(),
+                    approval.expiresAt(),
+                    approval.decidedAt(),
+                    approval.decidedBy()
+            );
+        }
+    }
+
+    public record ApprovalDetailResponse(
+            String approvalId,
+            String traceId,
+            String stepId,
+            String requesterId,
+            String toolName,
+            String serviceName,
+            Map<String, Object> arguments,
+            String riskLevel,
+            String status,
+            String reason,
+            String actionHash,
+            Instant createdAt,
+            Instant expiresAt,
+            Instant decidedAt,
+            String decidedBy
+    ) {
+        static ApprovalDetailResponse from(ApprovalRecord approval) {
+            return new ApprovalDetailResponse(
+                    approval.approvalId(),
+                    approval.traceId(),
+                    approval.stepId(),
+                    approval.requesterId(),
+                    approval.toolName(),
+                    extractServiceName(approval),
+                    approval.canonicalArguments(),
+                    approval.riskLevel().name(),
+                    approval.status().name(),
+                    approval.reason(),
+                    approval.actionHash(),
+                    approval.createdAt(),
+                    approval.expiresAt(),
+                    approval.decidedAt(),
+                    approval.decidedBy()
+            );
+        }
+    }
+
+    private static String extractServiceName(ApprovalRecord approval) {
+        Object value = approval.canonicalArguments().get("serviceName");
+        return value == null ? "" : String.valueOf(value);
     }
 
     public record ApprovalDecisionRequest(

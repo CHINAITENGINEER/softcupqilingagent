@@ -16,6 +16,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.blankOrNullString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -73,6 +74,32 @@ class ApprovalControllerWebTest {
                 .andExpect(jsonPath("$.status").value("APPROVED"))
                 .andExpect(jsonPath("$.leaseId", not(blankOrNullString())))
                 .andExpect(jsonPath("$.actionHash").value(approval.actionHash()));
+    }
+
+    @Test
+    void shouldListAndGetApprovalDetails() throws Exception {
+        ApprovalRecord approval = requestApproval("requester-list");
+
+        mockMvc.perform(get("/api/approvals"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].approvalId").value(approval.approvalId()))
+                .andExpect(jsonPath("$[0].traceId").value(approval.traceId()))
+                .andExpect(jsonPath("$[0].toolName").value("restart_service"))
+                .andExpect(jsonPath("$[0].serviceName").value("nginx"))
+                .andExpect(jsonPath("$[0].riskLevel").value("MEDIUM"))
+                .andExpect(jsonPath("$[0].status").value("PENDING"));
+
+        mockMvc.perform(get("/api/approvals/{approvalId}", approval.approvalId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.approvalId").value(approval.approvalId()))
+                .andExpect(jsonPath("$.arguments.serviceName").value("nginx"))
+                .andExpect(jsonPath("$.actionHash").value(approval.actionHash()));
+    }
+
+    @Test
+    void shouldReturnNotFoundForMissingApprovalDetail() throws Exception {
+        mockMvc.perform(get("/api/approvals/{approvalId}", "missing-approval"))
+                .andExpect(status().isNotFound());
     }
 
     private ApprovalRecord requestApproval(String requesterId) {

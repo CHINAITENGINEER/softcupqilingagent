@@ -20,6 +20,41 @@ Example:
 Invoke-RestMethod "http://localhost:8088/actuator/health"
 ```
 
+## System status
+
+### GET `/api/system/status`
+
+Returns console-oriented backend status, including registered tools, approval counts, audit trace count, RAG mode, active profiles, and runtime metadata.
+
+Response highlights:
+
+```json
+{
+  "status": "UP",
+  "serviceName": "QilingOS SafeOps Agent",
+  "version": "0.1.0-SNAPSHOT",
+  "activeProfiles": [],
+  "agent": {
+    "status": "ONLINE",
+    "registeredToolCount": 3
+  },
+  "approvals": {
+    "total": 1,
+    "pending": 1,
+    "highRiskPending": 1
+  },
+  "audit": {
+    "traceCount": 4,
+    "integrityMode": "ENABLED"
+  },
+  "rag": {
+    "enabled": false,
+    "retrieverMode": "keyword",
+    "vectorStoreProvider": "in-memory"
+  }
+}
+```
+
 ## Agent
 
 ### POST `/api/agent/chat`
@@ -68,6 +103,35 @@ Important statuses:
 | `DENIED` | Policy rejected the planned action. |
 
 ## Approvals
+
+### GET `/api/approvals`
+
+Lists approval records for the console, ordered by newest first.
+
+Response item:
+
+```json
+{
+  "approvalId": "approval-xxx",
+  "traceId": "trace-xxx",
+  "stepId": "step-1",
+  "requesterId": "operator-1",
+  "toolName": "restart_service",
+  "serviceName": "nginx",
+  "riskLevel": "HIGH",
+  "status": "PENDING",
+  "reason": "requires approval",
+  "actionHash": "...",
+  "createdAt": "...",
+  "expiresAt": "...",
+  "decidedAt": null,
+  "decidedBy": ""
+}
+```
+
+### GET `/api/approvals/{approvalId}`
+
+Returns one approval with canonical arguments.
 
 ### POST `/api/approvals/approve`
 
@@ -164,6 +228,48 @@ Gets one trace by ID.
 Checks hash-chain integrity for one trace.
 
 Response fields depend on `AuditIntegrityResult`, but the result indicates whether the trace is intact and where any mismatch is found.
+
+## RAG status
+
+### GET `/api/rag/status`
+
+Returns RAG configuration safe for UI display. Secret fields such as API keys and tokens are never returned.
+
+```json
+{
+  "enabled": false,
+  "retrieverMode": "keyword",
+  "embeddingProvider": "deterministic",
+  "embeddingModel": "",
+  "vectorStoreProvider": "in-memory",
+  "milvusUri": "",
+  "milvusCollection": "",
+  "milvusDimension": 0,
+  "milvusMetricType": "cosine",
+  "milvusIndexType": "autoindex",
+  "maxResults": 5
+}
+```
+
+### GET `/api/rag/stats`
+
+Returns vector store statistics. In-memory vector store exposes exact record count; external providers may return `vectorRecordCountStatus = "unknown"`.
+
+```json
+{
+  "vectorStoreProvider": "in-memory",
+  "collection": "",
+  "vectorRecordCount": 0,
+  "vectorRecordCountStatus": "known",
+  "indexParameters": {
+    "hnswM": 16,
+    "hnswEfConstruction": 200,
+    "hnswEf": 64,
+    "ivfFlatNlist": 128,
+    "ivfFlatNprobe": 16
+  }
+}
+```
 
 ## RAG Knowledge
 
