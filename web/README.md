@@ -66,6 +66,10 @@ In Live Mode, Approval Center loads the canonical approval detail before making 
 
 The default backend uses rule planning, deterministic embeddings, and in-memory storage, so no API key is required. Real LLM or embedding keys belong only in backend environment variables and must never use a `VITE_*` prefix.
 
+The API base defaults to an empty value, which uses same-origin `/api` and `/actuator` requests through the Vite or Nginx proxy. Set an absolute base URL only when the backend has an explicit CORS policy for the console origin.
+
+The current local console sends demo identity headers, including `APPROVER`, `OPERATOR`, and `EXECUTOR`, so the complete approval/lease/execute workflow can be demonstrated. This is not a production authentication boundary: production deployments must replace browser-supplied role headers with trusted identity and authorization issued or validated by an authentication gateway.
+
 ## Demo mode
 
 If the backend is unavailable, each page gracefully renders representative SafeOps data and marks the state as **Demo Mode**. No mock action is sent to an external system.

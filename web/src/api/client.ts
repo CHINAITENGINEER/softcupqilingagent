@@ -1,7 +1,7 @@
 import type { AgentResponse, Approval, ApprovalDecision, ApprovalExecution, AuditTrace, HealthResponse, Knowledge, KnowledgeInput, RagStats, RagStatus, SystemMetrics, SystemStatus, ToolDefinition } from './types'
 export type { AgentResponse, Approval, AuditTrace, Knowledge } from './types'
 
-const base = () => localStorage.getItem('safeops.apiBase') || import.meta.env.VITE_SAFEOPS_API_BASE_URL || 'http://localhost:8088'
+const base = () => localStorage.getItem('safeops.apiBase') || import.meta.env.VITE_SAFEOPS_API_BASE_URL || ''
 export class ApiNetworkError extends Error { constructor(message = 'Network unavailable') { super(message); this.name = 'ApiNetworkError' } }
 export class ApiTimeoutError extends Error { constructor(message = 'Request timed out') { super(message); this.name = 'ApiTimeoutError' } }
 export class ApiHttpError extends Error { constructor(public readonly status: number, public readonly code: string, message: string, public readonly path: string, public readonly body: unknown) { super(message); this.name = 'ApiHttpError' } }
@@ -10,7 +10,7 @@ export class ApiUnavailable extends ApiNetworkError {}
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const controller = new AbortController(); const timeout = window.setTimeout(() => controller.abort(), 4500)
   try {
-    const response = await fetch(`${base()}${path}`, { ...init, headers: { 'Content-Type': 'application/json', 'X-Actor-Id': localStorage.getItem('safeops.userId') || 'operator-1', 'X-Actor-Roles': 'APPROVER,OPERATOR', ...(init?.headers || {}) }, signal: controller.signal })
+    const response = await fetch(`${base()}${path}`, { ...init, headers: { 'Content-Type': 'application/json', 'X-Actor-Id': localStorage.getItem('safeops.userId') || 'operator-1', 'X-Actor-Roles': 'APPROVER,OPERATOR,EXECUTOR', ...(init?.headers || {}) }, signal: controller.signal })
     const text = await response.text(); let body: unknown
     try { body = text ? JSON.parse(text) : undefined } catch { body = text }
     if (!response.ok) { const error = body && typeof body === 'object' ? body as Record<string, unknown> : {}; throw new ApiHttpError(response.status, String(error.code || `HTTP_${response.status}`), String(error.message || response.statusText || 'Request failed'), String(error.path || path), body) }

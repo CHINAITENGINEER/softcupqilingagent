@@ -350,6 +350,8 @@ Build and run the containerized demo from a clean checkout:
 docker compose -f docker-compose.demo.yml up --build
 ```
 
+The console uses same-origin `/api` and `/actuator` requests by default, allowing both Vite and Nginx to proxy backend traffic without requiring permissive CORS. The local console identity headers are for demonstration only; production must derive roles and permissions from a trusted authentication boundary rather than browser-provided headers.
+
 Open `http://localhost:8080`. The backend is exposed on `http://localhost:8088`. Real LLM and embedding credentials must be injected only through backend environment variables such as `SAFEOPS_LLM_API_KEY` and `SAFEOPS_RAG_EMBEDDING_API_KEY`; never expose them through `VITE_*` variables or commit them to the repository. Milvus remains optional and is configured through the existing `rag-milvus` profile and `SAFEOPS_RAG_*` environment variables.
 
 ## Documentation
