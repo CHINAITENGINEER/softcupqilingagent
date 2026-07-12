@@ -1,6 +1,7 @@
 # QilingOS SafeOps Agent
 
 [![Java CI](https://github.com/CHINAITENGINEER/softcupqilingagent/actions/workflows/java-ci.yml/badge.svg)](https://github.com/CHINAITENGINEER/softcupqilingagent/actions/workflows/java-ci.yml)
+[![Web Console CI](https://github.com/CHINAITENGINEER/softcupqilingagent/actions/workflows/web-console-ci.yml/badge.svg)](https://github.com/CHINAITENGINEER/softcupqilingagent/actions/workflows/web-console-ci.yml)
 [![Milvus RAG integration](https://github.com/CHINAITENGINEER/softcupqilingagent/actions/workflows/milvus-integration.yml/badge.svg)](https://github.com/CHINAITENGINEER/softcupqilingagent/actions/workflows/milvus-integration.yml)
 
 QilingOS SafeOps Agent is a Spring Boot based intelligent operations agent for safe, auditable, and approval-aware system operations. It includes rule-based planning, OpenAI-compatible LLM planning, policy checks, approval workflow, audit trace, verification, and RAG knowledge retrieval with Milvus vector store support.
