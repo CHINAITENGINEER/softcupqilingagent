@@ -61,6 +61,16 @@ class LlmProviderPropertiesTest {
     }
 
     @Test
+    void shouldRejectUnsupportedThinkingMode() {
+        LlmProviderProperties properties = validProperties();
+        properties.setThinkingMode("automatic");
+
+        assertThatThrownBy(properties::validateForLlmMode)
+                .isInstanceOf(LlmProviderException.class)
+                .hasMessageContaining("thinkingMode");
+    }
+
+    @Test
     void shouldRejectInvalidNumericConfig() {
         LlmProviderProperties properties = validProperties();
         properties.setReadTimeoutMs(0);

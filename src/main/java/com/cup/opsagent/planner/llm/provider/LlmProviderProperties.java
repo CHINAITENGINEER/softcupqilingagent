@@ -21,6 +21,7 @@ public class LlmProviderProperties {
     private int maxOutputTokens = 1_000;
     private boolean auditRawResponse = false;
     private boolean responseFormatJsonObject = true;
+    private String thinkingMode = "";
 
     public void validateForLlmMode() {
         requireText(baseUrl, "baseUrl");
@@ -32,6 +33,18 @@ public class LlmProviderProperties {
         validatePositive(maxOutputTokens, "maxOutputTokens");
         if (temperature < 0 || temperature > 2) {
             throw misconfigured("temperature must be between 0 and 2");
+        }
+        validateThinkingMode();
+    }
+
+    public String normalizedThinkingMode() {
+        return thinkingMode == null ? "" : thinkingMode.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private void validateThinkingMode() {
+        String normalized = normalizedThinkingMode();
+        if (!normalized.isEmpty() && !normalized.equals("enabled") && !normalized.equals("disabled")) {
+            throw misconfigured("thinkingMode must be enabled, disabled, or empty");
         }
     }
 
@@ -162,5 +175,13 @@ public class LlmProviderProperties {
 
     public void setResponseFormatJsonObject(boolean responseFormatJsonObject) {
         this.responseFormatJsonObject = responseFormatJsonObject;
+    }
+
+    public String getThinkingMode() {
+        return thinkingMode;
+    }
+
+    public void setThinkingMode(String thinkingMode) {
+        this.thinkingMode = thinkingMode;
     }
 }

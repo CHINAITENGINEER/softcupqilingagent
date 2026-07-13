@@ -6,11 +6,14 @@ import com.cup.opsagent.planner.llm.provider.dto.OpenAiChatCompletionResponse;
 import com.cup.opsagent.planner.llm.provider.dto.OpenAiResponseFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
+
+import java.util.Map;
 
 @Component
 public class OpenAiCompatibleLlmPlannerClient implements LlmPlannerClient {
@@ -33,7 +36,8 @@ public class OpenAiCompatibleLlmPlannerClient implements LlmPlannerClient {
                 properties,
                 promptFactory,
                 responseExtractor,
-                restClientBuilder
+                restClientBuilder.clone()
+                        .requestFactory(requestFactory(properties))
                         .baseUrl(trimTrailingSlash(properties.getBaseUrl()))
                         .defaultHeader("Authorization", "Bearer " + properties.getApiKey())
                         .build()
@@ -74,7 +78,10 @@ public class OpenAiCompatibleLlmPlannerClient implements LlmPlannerClient {
                 ragContext == null ? promptFactory.createMessages(userInput) : promptFactory.createMessages(userInput, ragContext),
                 properties.getTemperature(),
                 properties.getMaxOutputTokens(),
-                properties.isResponseFormatJsonObject() ? OpenAiResponseFormat.jsonObject() : null
+                properties.isResponseFormatJsonObject() ? OpenAiResponseFormat.jsonObject() : null,
+                properties.normalizedThinkingMode().isEmpty()
+                        ? null
+                        : Map.of("type", properties.normalizedThinkingMode())
         );
     }
 
@@ -117,6 +124,13 @@ public class OpenAiCompatibleLlmPlannerClient implements LlmPlannerClient {
 
     private LlmProviderException providerException(LlmProviderErrorCode code, int status, RestClientResponseException cause) {
         return new LlmProviderException(code, "LLM provider HTTP error status=" + status);
+    }
+
+    private static SimpleClientHttpRequestFactory requestFactory(LlmProviderProperties properties) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(properties.getConnectTimeoutMs());
+        requestFactory.setReadTimeout(properties.getReadTimeoutMs());
+        return requestFactory;
     }
 
     private static String trimTrailingSlash(String value) {

@@ -78,6 +78,22 @@ class OpenAiCompatibleLlmPlannerClientTest {
     }
 
     @Test
+    void shouldSendConfiguredThinkingMode() {
+        LlmProviderProperties properties = validProperties();
+        properties.setThinkingMode("disabled");
+        OpenAiCompatibleLlmPlannerClient client = client(properties, RestClient.builder());
+
+        assertThat(client.buildRequest("检查系统负载").thinking()).containsEntry("type", "disabled");
+    }
+
+    @Test
+    void shouldOmitThinkingWhenNotConfigured() {
+        OpenAiCompatibleLlmPlannerClient client = client(validProperties(), RestClient.builder());
+
+        assertThat(client.buildRequest("检查系统负载").thinking()).isNull();
+    }
+
+    @Test
     void shouldMapUnauthorizedHttpStatus() {
         assertHttpStatusMapsTo(HttpStatus.UNAUTHORIZED, LlmProviderErrorCode.LLM_PROVIDER_UNAUTHORIZED);
         assertHttpStatusMapsTo(HttpStatus.FORBIDDEN, LlmProviderErrorCode.LLM_PROVIDER_UNAUTHORIZED);
@@ -139,6 +155,9 @@ class OpenAiCompatibleLlmPlannerClientTest {
                 promptFactory,
                 new OpenAiChatCompletionResponseExtractor(),
                 builder
+                        .baseUrl(properties.getBaseUrl())
+                        .defaultHeader("Authorization", "Bearer " + properties.getApiKey())
+                        .build()
         );
     }
 
