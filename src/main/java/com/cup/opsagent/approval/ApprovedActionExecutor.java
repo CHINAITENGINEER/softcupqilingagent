@@ -111,6 +111,11 @@ public class ApprovedActionExecutor {
                 "executionSuccess", executionResult.success(),
                 "verified", verificationResult.verified()
         )));
+        String finalStatus = verificationResult.verified() ? "SUCCESS" : "VERIFICATION_FAILED";
+        String finalAnswer = verificationResult.verified()
+                ? "approved action executed and verified"
+                : "approved action execution did not pass verification";
+        auditLogService.conclude(traceId, finalStatus, finalAnswer);
         return new ApprovedActionResult(consumedLease, executionResult, verificationResult);
     }
 

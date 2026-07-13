@@ -49,6 +49,13 @@ public class AuditLogService {
         });
     }
 
+    public void conclude(String traceId, String status, String finalAnswer) {
+        auditTraceRepository.findByTraceId(traceId).ifPresent(trace -> {
+            trace.finish(status, finalAnswer);
+            auditTraceRepository.save(trace);
+        });
+    }
+
     public Optional<AuditTrace> findTrace(String traceId) {
         return auditTraceRepository.findByTraceId(traceId);
     }

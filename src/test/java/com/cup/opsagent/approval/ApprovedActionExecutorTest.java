@@ -64,6 +64,8 @@ class ApprovedActionExecutorTest {
         assertThat(approvalService.findApproval(approval.approvalId()).orElseThrow().status()).isEqualTo(ApprovalStatus.CONSUMED);
 
         AuditTrace updatedTrace = auditLogService.findTrace(trace.getTraceId()).orElseThrow();
+        assertThat(updatedTrace.getStatus()).isEqualTo("SUCCESS");
+        assertThat(updatedTrace.getEndedAt()).isNotNull();
         assertThat(updatedTrace.getEvents()).extracting(event -> event.eventType()).contains(
                 AuditEventType.EXECUTION_LEASE_CONSUMED,
                 AuditEventType.EXECUTION_STARTED,
