@@ -36,11 +36,14 @@ The default console address is `http://localhost:5173`. Vite proxies `/api` and 
 
 ## Connect a backend
 
-Create `web/.env.local`:
+Create `web/.env.local` to keep browser requests same-origin while selecting the development backend and allowing enough time for LLM planning:
 
 ```text
-VITE_SAFEOPS_API_BASE_URL=http://localhost:8088
+VITE_SAFEOPS_PROXY_TARGET=http://localhost:8090
+VITE_SAFEOPS_CHAT_TIMEOUT_MS=120000
 ```
+
+`VITE_SAFEOPS_PROXY_TARGET` defaults to `http://localhost:8088`. `VITE_SAFEOPS_CHAT_TIMEOUT_MS` affects only Agent Chat; health, approval, audit, and knowledge requests keep the short fail-fast timeout. Use `VITE_SAFEOPS_API_BASE_URL` only when the backend explicitly allows the console origin through CORS.
 
 The System Settings screen can also override this value locally. The console uses these live backend endpoints:
 
