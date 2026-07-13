@@ -26,10 +26,16 @@ public class ApproverPolicy {
         }
     }
 
-    public void assertCanExecuteApprovedAction(Actor actor) {
+    public void assertCanExecuteApprovedAction(Actor actor, ApprovalRecord approvalRecord) {
         assertKnownActor(actor);
         if (!actor.hasPermission(Permission.EXECUTE_APPROVED_ACTION)) {
             throw new SecurityException("actor is not allowed to execute approved action");
+        }
+        if (approvalRecord == null || approvalRecord.decidedBy() == null || approvalRecord.decidedBy().isBlank()) {
+            throw new SecurityException("approved action requires a recorded approver");
+        }
+        if (actor.actorType() == ActorType.HUMAN && approvalRecord.decidedBy().equals(actor.actorId())) {
+            throw new SecurityException("approver cannot execute their own approved action");
         }
     }
 

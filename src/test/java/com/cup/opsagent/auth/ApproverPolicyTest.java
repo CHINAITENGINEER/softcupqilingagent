@@ -72,7 +72,7 @@ class ApproverPolicyTest {
     void shouldAllowExecutorToExecuteApprovedAction() {
         Actor executor = new Actor("executor-1", Set.of(Role.EXECUTOR));
 
-        assertThatNoException().isThrownBy(() -> approverPolicy.assertCanExecuteApprovedAction(executor));
+        assertThatNoException().isThrownBy(() -> approverPolicy.assertCanExecuteApprovedAction(executor, approvalApprovedBy("approver-1")));
     }
 
     @Test
@@ -84,16 +84,42 @@ class ApproverPolicyTest {
                 Set.of()
         );
 
-        assertThatNoException().isThrownBy(() -> approverPolicy.assertCanExecuteApprovedAction(agent));
+        assertThatNoException().isThrownBy(() -> approverPolicy.assertCanExecuteApprovedAction(agent, approvalApprovedBy("approver-1")));
+    }
+
+    @Test
+    void shouldRejectHumanApproverExecutingTheirOwnApprovedAction() {
+        Actor approverAndExecutor = new Actor("approver-1", Set.of(Role.APPROVER, Role.EXECUTOR));
+
+        assertThatThrownBy(() -> approverPolicy.assertCanExecuteApprovedAction(
+                approverAndExecutor,
+                approvalApprovedBy("approver-1")
+        ))
+                .isInstanceOf(SecurityException.class)
+                .hasMessageContaining("approver cannot execute");
+    }
+
+    @Test
+    void shouldRejectExecutionWithoutRecordedApprover() {
+        Actor executor = new Actor("executor-1", Set.of(Role.EXECUTOR));
+
+        assertThatThrownBy(() -> approverPolicy.assertCanExecuteApprovedAction(executor, approvalRequestedBy("requester-1")))
+                .isInstanceOf(SecurityException.class)
+                .hasMessageContaining("recorded approver");
     }
 
     @Test
     void shouldRejectApprovedActionExecutionWithoutExecutePermission() {
         Actor approver = new Actor("approver-1", Set.of(Role.APPROVER));
 
-        assertThatThrownBy(() -> approverPolicy.assertCanExecuteApprovedAction(approver))
+        assertThatThrownBy(() -> approverPolicy.assertCanExecuteApprovedAction(approver, approvalRequestedBy("requester-1")))
                 .isInstanceOf(SecurityException.class)
                 .hasMessageContaining("not allowed to execute approved action");
+    }
+
+    private ApprovalRecord approvalApprovedBy(String approverId) {
+        Instant now = Instant.parse("2026-06-29T10:00:00Z");
+        return approvalRequestedBy("requester-1").withStatus(ApprovalStatus.APPROVED, approverId, now.plusSeconds(30));
     }
 
     private ApprovalRecord approvalRequestedBy(String requesterId) {

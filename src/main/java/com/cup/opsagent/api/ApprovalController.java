@@ -110,7 +110,9 @@ public class ApprovalController {
             @Valid @RequestBody ApprovedExecutionRequest request,
             @CurrentActor Actor actor
     ) {
-        approverPolicy.assertCanExecuteApprovedAction(actor);
+        ExecutionLease lease = approvalService.findLease(request.leaseId()).orElseThrow();
+        ApprovalRecord approval = approvalService.findApproval(lease.approvalId()).orElseThrow();
+        approverPolicy.assertCanExecuteApprovedAction(actor, approval);
         ApprovedActionResult result = approvedActionExecutor.execute(request.leaseId(), request.toolName(), request.arguments());
         return ApprovedExecutionResponse.from(result);
     }

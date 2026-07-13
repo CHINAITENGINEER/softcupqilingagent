@@ -2,6 +2,7 @@ package com.cup.opsagent.api;
 
 import com.cup.opsagent.approval.ApprovalRecord;
 import com.cup.opsagent.approval.ApprovalService;
+import com.cup.opsagent.approval.ExecutionLease;
 import com.cup.opsagent.auth.ActorResolver;
 import com.cup.opsagent.tool.core.RiskLevel;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -96,6 +97,27 @@ class ApprovalControllerWebTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("STATE_CONFLICT"))
                 .andExpect(jsonPath("$.path").value("/api/approvals/approve"));
+    }
+
+    @Test
+    void shouldRejectApproverExecutingTheirOwnApprovedActionWithoutConsumingLease() throws Exception {
+        ApprovalRecord approval = requestApproval("requester-execution-separation");
+        ExecutionLease lease = approvalService.approve(approval.approvalId(), "approver-executor");
+
+        mockMvc.perform(post("/api/approvals/execute")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(ActorResolver.ACTOR_ID_HEADER, "approver-executor")
+                        .header(ActorResolver.ACTOR_ROLES_HEADER, "APPROVER,EXECUTOR")
+                        .content(json(Map.of(
+                                "leaseId", lease.leaseId(),
+                                "toolName", "restart_service",
+                                "arguments", Map.of("serviceName", "nginx")
+                        ))))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCESS_DENIED"));
+
+        org.assertj.core.api.Assertions.assertThat(approvalService.findLease(lease.leaseId()).orElseThrow().consumed())
+                .isFalse();
     }
 
     @Test
